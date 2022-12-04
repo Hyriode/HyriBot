@@ -1,0 +1,64 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.0"
+}
+
+apply plugin: 'idea'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+group = 'fr.hyriode'
+version = '1.0.0'
+archivesBaseName = 'HyriBot'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+compileJava {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+    maven {
+        name = 'Hydrion_maven'
+        url = 'https://maven.pkg.github.com/Hyriode/Hydrion/'
+
+        credentials {
+            username System.getenv("GITHUB_USERNAME")
+            password System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.runtimeClasspath]
+    manifest {
+        attributes 'Main-Class': 'fr.hyriode.hyribot.Bootstrap'
+    }
+}
+
+dependencies {
+    implementation group: 'net.dv8tion', name: 'JDA', version: '+'
+    implementation 'com.sedmelluq:lavaplayer:1.3.75'
+    implementation 'com.google.apis:google-api-services-youtube:v3-rev212-1.25.0'
+    implementation "fr.hyriode:hyriapi-app:1.3.2"
+}
+
+processResources {
+    filter {
+        it.replace('@version@', project.version)
+    }
+    task repairPublicFiles(type: Copy) {
+        from 'src/main/resources'
+        into 'build/resources/main'
+    }
+    processResources.finalizedBy repairPublicFiles
+}

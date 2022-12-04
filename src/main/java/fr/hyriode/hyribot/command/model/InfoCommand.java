@@ -1,0 +1,46 @@
+package fr.hyriode.hyribot.command.model;
+
+import fr.hyriode.hyribot.HyriBot;
+import fr.hyriode.hyribot.command.HyriSlashCommand;
+import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
+
+public class InfoCommand extends HyriSlashCommand {
+
+    public InfoCommand(HyriBot bot) {
+        super(bot);
+    }
+
+    @Override
+    public void execute(SlashCommandInteractionEvent event) {
+        Guild guild = event.getGuild();
+
+        if(guild == null) return;
+
+        String guildIconURL = guild.getIconUrl();
+        String guildBannerURL = guild.getBannerUrl();
+
+        StringBuilder desc = new StringBuilder();
+        EmbedBuilder e = new HyriEmbedBuilder()
+                .setTitle("Informations");
+
+        if(guildIconURL != null) e.setThumbnail(guildIconURL);
+        if(guildBannerURL != null) e.setImage(guildBannerURL + "?size=256");
+
+        desc.append("Minecraft Java (Non Bedrock)\n");
+        desc.append("Type: Mini-Jeux\n");
+        desc.append("Version: 1.8-1.18\n");
+        desc.append("Ouvert aux Premium\n");
+
+        event.replyEmbeds(e.setDescription(desc).build()).queue();
+    }
+
+    @Override
+    public SlashCommandData getData() {
+        return new CommandDataImpl("info", "Affiche les informations du serveur.");
+    }
+}
