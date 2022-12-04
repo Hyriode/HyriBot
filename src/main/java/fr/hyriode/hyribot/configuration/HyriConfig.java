@@ -1,7 +1,7 @@
 package fr.hyriode.hyribot.configuration;
 
-import fr.hyriode.api.config.HyriMongoDBConfig;
-import fr.hyriode.api.config.HyriRedisConfig;
+import fr.hyriode.api.config.MongoDBConfig;
+import fr.hyriode.api.config.RedisConfig;
 import fr.hyriode.hyribot.command.HyriodeRole;
 import fr.hyriode.hyribot.idea.IdeaType;
 import fr.hyriode.hyribot.ticket.TicketReportType;
@@ -11,8 +11,8 @@ import java.util.Map;
 
 public class HyriConfig {
 
-    private final HyriRedisConfig redis;
-    private final HyriMongoDBConfig mongoDB;
+    private final RedisConfig redis;
+    private final MongoDBConfig mongoDB;
 
     private final String token;
     private final Map<String, Long> roles;
@@ -20,7 +20,7 @@ public class HyriConfig {
     private final Map<String, Long> ideaChannels;
     private final Map<String, Long> voiceCustom;
 
-    public HyriConfig(HyriRedisConfig redisConfig, HyriMongoDBConfig mongoDBConfig) {
+    public HyriConfig(RedisConfig redisConfig, MongoDBConfig mongoDBConfig) {
         this.redis = redisConfig;
         this.mongoDB = mongoDBConfig;
         this.token = System.getenv("TOKEN_HYRIBOT");
@@ -42,11 +42,11 @@ public class HyriConfig {
         return this.roles;
     }
 
-    public HyriRedisConfig getRedis() {
+    public RedisConfig getRedis() {
         return this.redis;
     }
 
-    public HyriMongoDBConfig getMongoDB() {
+    public MongoDBConfig getMongoDB() {
         return this.mongoDB;
     }
 

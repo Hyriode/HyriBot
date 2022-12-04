@@ -26,5 +26,10 @@
       <option name="name" value="m2-dv8tion" />
       <option name="url" value="https://m2.dv8tion.net/releases" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="HyriAPI_maven" />
+      <option name="name" value="HyriAPI_maven" />
+      <option name="url" value="https://maven.pkg.github.com/Hyriode/HyriAPI/" />
+    </remote-repository>
   </component>
 </project>
