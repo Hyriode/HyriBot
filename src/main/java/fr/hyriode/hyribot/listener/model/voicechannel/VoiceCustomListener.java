@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -33,14 +34,18 @@ public class VoiceCustomListener extends HyriListener {
 
     private static final String PREFIX_MANAGE = "voice.custom.manage.";
 
-    private static final String BUTTON_PANEL_PRIVATE = PREFIX_MANAGE + "private";
-    private static final String BUTTON_PANEL_PUBLIC = PREFIX_MANAGE + "public";
-    private static final String BUTTON_PANEL_NAME = PREFIX_MANAGE + "name";
-    private static final String BUTTON_PANEL_LIMIT_USER = PREFIX_MANAGE + "limit";
-    private static final String BUTTON_PANEL_WHITELIST = PREFIX_MANAGE + "whitelist";
+    public static final String BUTTON_PANEL_PRIVATE = PREFIX_MANAGE + "private";
+    public static final String BUTTON_PANEL_PUBLIC = PREFIX_MANAGE + "public";
+    public static final String BUTTON_PANEL_NAME = PREFIX_MANAGE + "name";
+    public static final String BUTTON_PANEL_LIMIT_USER = PREFIX_MANAGE + "limit";
+    public static final String BUTTON_PANEL_WHITELIST = PREFIX_MANAGE + "whitelist";
+    public static final String BUTTON_PANEL_MANAGE_MEMBERS = PREFIX_MANAGE + "members";
 
-    private static final String BUTTON_PANEL_WHITELIST_ADD_USER = BUTTON_PANEL_WHITELIST + ".add";
-    private static final String BUTTON_PANEL_WHITELIST_REMOVE_USER = BUTTON_PANEL_WHITELIST + ".remove";
+    public static final String BUTTON_PANEL_WHITELIST_ADD_USER = BUTTON_PANEL_WHITELIST + ".add";
+    public static final String BUTTON_PANEL_WHITELIST_REMOVE_USER = BUTTON_PANEL_WHITELIST + ".remove";
+
+    public static final String BUTTON_PANEL_MANAGE_MEMBERS_REMOVE_USER = BUTTON_PANEL_MANAGE_MEMBERS + ".remove";
+    public static final String BUTTON_PANEL_MANAGE_MEMBERS_BAN_USER = BUTTON_PANEL_MANAGE_MEMBERS + ".ban";
 
     public VoiceCustomListener(HyriBot bot) {
         super(bot);
@@ -81,11 +86,7 @@ public class VoiceCustomListener extends HyriListener {
             case BUTTON_PANEL: {
                 ReplyCallbackAction reply = event.replyEmbeds(this.getEmbedPanel(voiceChannel, voiceCustom).build()).setEphemeral(true);
                 if(voiceCustom.getOwnerId() == member.getIdLong()){
-                    reply.setActionRow(ActionRow.of(voiceCustom.isPublic() ? Button.danger(BUTTON_PANEL_PRIVATE, "Rendre privé") : Button.success(BUTTON_PANEL_PUBLIC, "Rendre public"),
-                            Button.secondary(BUTTON_PANEL_NAME, "Gérer le nom"),
-                            Button.secondary(BUTTON_PANEL_LIMIT_USER, "Gérer la limite d'utilisateurs"),
-                            Button.secondary(BUTTON_PANEL_WHITELIST, "Gérer la whitelist")
-                    ).getComponents());
+                    reply.setActionRow(voiceCustom.getButtons());
                 }
                 reply.queue();
             } break;
@@ -93,9 +94,12 @@ public class VoiceCustomListener extends HyriListener {
             case BUTTON_PANEL_PUBLIC: {//TODO
                 boolean isPublic = !voiceCustom.isPublic();
                 voiceCustom.setPublic(isPublic, () -> {
-                    event.editButton(isPublic ? Button.success(BUTTON_PANEL_PUBLIC, "Rendre public") : Button.danger(BUTTON_PANEL_PRIVATE, "Rendre privé")).queue();
+                    System.out.println("Set public from " + isPublic);
                     event.deferEdit().setEmbeds(this.getEmbedPanel(voiceChannel, voiceCustom).build())
-                            .queue();
+                            .setActionRow(voiceCustom.getButtons())
+                            .queue((v) -> {
+                                System.out.println("BAH OUI FILS DE LOGIQUE");
+                            });
                 });
             } break;
             case BUTTON_PANEL_NAME: {
@@ -113,7 +117,31 @@ public class VoiceCustomListener extends HyriListener {
             case BUTTON_PANEL_WHITELIST: {
                 event.reply(this.getWhitelistPanel(voiceCustom, voiceChannel)).setEphemeral(true).queue();
             } break;
+            case BUTTON_PANEL_MANAGE_MEMBERS: {
+                event.reply(this.getMembersPanel()).setEphemeral(true).queue();
+            } break;
+            case BUTTON_PANEL_MANAGE_MEMBERS_REMOVE_USER: {
+                event.replyModal(this.bot.getModalManager().createMemberModal((modalEvent, memberFind) -> {
+                    modalEvent.reply(memberFind.getAsMention() + " a été retiré du channel").setEphemeral(true).queue();
+                    voiceCustom.kick(voiceChannel, memberFind);
+                })).queue();
+            } break;
+            case BUTTON_PANEL_MANAGE_MEMBERS_BAN_USER: {
+                event.replyModal(this.bot.getModalManager().createMemberModal((modalEvent, memberFind) -> {
+                    modalEvent.reply(memberFind.getAsMention() + " a été ban du channel").setEphemeral(true).queue();
+                    voiceCustom.ban(voiceChannel, memberFind);
+                })).queue();
+            } break;
         }
+    }
+
+    private MessageCreateData getMembersPanel() {
+        EmbedBuilder embedBuilder = new HyriEmbedBuilder()
+                .setTitle("Gestion des membres connecté");
+
+        return new MessageCreateBuilder().setEmbeds(embedBuilder.build())
+                .setActionRow(Button.danger(BUTTON_PANEL_MANAGE_MEMBERS_REMOVE_USER, "Kick un membre du vocal"))
+                .build();
     }
 
     private MessageCreateData getWhitelistPanel(VoiceCustom voiceCustom, VoiceChannel voiceChannel) {
@@ -153,10 +181,11 @@ public class VoiceCustomListener extends HyriListener {
 
     @Override
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
-        AudioChannel joinedChannel = event.getChannelJoined();
-        AudioChannel leftChannel = event.getChannelLeft();
-        long channelId = this.bot.getConfig().getVoiceCustomChannel();
-        VoiceCustomManager voiceCustomManager = this.bot.getVoiceCustomManager();
+        final AudioChannel joinedChannel = event.getChannelJoined();
+        final AudioChannel leftChannel = event.getChannelLeft();
+        final long channelId = this.bot.getConfig().getVoiceCustomChannel();
+        final long categoryId = this.bot.getConfig().getVoiceCustomCategory();
+        final VoiceCustomManager voiceCustomManager = this.bot.getVoiceCustomManager();
 
         //Joined channel
         if(joinedChannel != null) {
@@ -165,9 +194,9 @@ public class VoiceCustomListener extends HyriListener {
             }
         }
         //Left channel
-        if(leftChannel != null) {
-            VoiceCustom voiceCustom = voiceCustomManager.getVoiceCustomByIdChannel(leftChannel.getIdLong());
-            List<Member> members = leftChannel.getMembers().stream().filter(member -> !member.getUser().isBot())
+        if(leftChannel != null && leftChannel.getIdLong() != channelId) {
+            final VoiceCustom voiceCustom = voiceCustomManager.getVoiceCustomByIdChannel(leftChannel.getIdLong());
+            final List<Member> members = leftChannel.getMembers().stream().filter(member -> !member.getUser().isBot())
                     .collect(Collectors.toList());
 
             if (voiceCustom != null) {
@@ -176,6 +205,11 @@ public class VoiceCustomListener extends HyriListener {
                 } else if(event.getMember().getIdLong() == voiceCustom.getOwnerId()) {
                     voiceCustom.setOwnerId(members.get(ThreadLocalRandom.current().nextInt(members.size())).getIdLong());
                 }
+                return;
+            }
+
+            if(leftChannel.getParentCategoryIdLong() == categoryId) {
+                leftChannel.delete().queue();
             }
         }
     }

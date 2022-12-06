@@ -6,12 +6,17 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static fr.hyriode.hyribot.listener.model.voicechannel.VoiceCustomListener.*;
 
 public class VoiceCustom {
 
@@ -28,6 +33,17 @@ public class VoiceCustom {
         this.ownerId = member.getIdLong();
         this.guildId = member.getGuild().getIdLong();
         this.channelId = channel.getIdLong();
+    }
+
+    public List<ItemComponent> getButtons() {
+        return ActionRow.of(this.isPublic()
+                        ? Button.danger(BUTTON_PANEL_PRIVATE, "Rendre privé")
+                        : Button.success(BUTTON_PANEL_PUBLIC, "Rendre public"),
+                Button.secondary(BUTTON_PANEL_NAME, "Gérer le nom"),
+                Button.secondary(BUTTON_PANEL_LIMIT_USER, "Gérer la limite d'utilisateurs"),
+                Button.secondary(BUTTON_PANEL_WHITELIST, "Gérer la whitelist"),
+                Button.secondary(BUTTON_PANEL_MANAGE_MEMBERS, "Gérer les membres")
+        ).getComponents();
     }
 
     public String getId() {
@@ -50,8 +66,9 @@ public class VoiceCustom {
         Guild guild = guildSupplier.get();
         guild.getVoiceChannelById(this.channelId).getManager()
                 .putRolePermissionOverride(HyriodeRole.PLAYER.getRoleId(),
-                        isPublic ? EnumSet.of(Permission.VOICE_CONNECT) : null,
-                        isPublic ? null : EnumSet.of(Permission.VOICE_CONNECT)).queue(__ -> success.run());
+                        isPublic ? EnumSet.of(Permission.VOICE_CONNECT, Permission.VIEW_CHANNEL) : null,
+                        isPublic ? EnumSet.of(Permission.VIEW_CHANNEL) : EnumSet.of(Permission.VOICE_CONNECT))
+                .queue(__ -> success.run());
         this.isPublic = isPublic;
     }
 
@@ -77,5 +94,21 @@ public class VoiceCustom {
 
     public boolean isPublic() {
         return isPublic;
+    }
+
+    public boolean kick(VoiceChannel voiceChannel, Member memberFind) {
+        if (memberFind != null && voiceChannel != null && voiceChannel.getMembers().contains(memberFind)) {
+            memberFind.getGuild().kickVoiceMember(memberFind).queue();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean ban(VoiceChannel voiceChannel, Member memberFind) {
+        if(memberFind != null && voiceChannel != null && voiceChannel.getMembers().contains(memberFind)) {
+            voiceChannel.getManager().putPermissionOverride(memberFind, null, EnumSet.of(Permission.VOICE_CONNECT)).queue();
+            return this.kick(voiceChannel, memberFind);
+        }
+        return false;
     }
 }
