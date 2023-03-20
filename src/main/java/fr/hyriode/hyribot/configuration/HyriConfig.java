@@ -19,6 +19,9 @@ public class HyriConfig {
     private final Map<String, Long> categoryTickets;
     private final Map<String, Long> ideaChannels;
     private final Map<String, Long> voiceCustom;
+    private final Long statusChannel;
+    private final Long guildId;
+    private final Long reportChannel;
 
     public HyriConfig(RedisConfig redisConfig, MongoDBConfig mongoDBConfig) {
         this.redis = redisConfig;
@@ -28,6 +31,9 @@ public class HyriConfig {
         this.categoryTickets = new HashMap<>();
         this.ideaChannels = new HashMap<>();
         this.voiceCustom = new HashMap<>();
+        this.statusChannel = null;
+        this.guildId = null;
+        this.reportChannel = null;
     }
 
     public String getToken() {
@@ -72,5 +78,31 @@ public class HyriConfig {
 
     public long getVoiceCustomChannel() {
         return this.voiceCustom.get("channel");
+    }
+
+    public Long getStatusChannel() {
+        return this.statusChannel;
+    }
+
+    public Long getGuildId() {
+        return this.guildId;
+    }
+
+    public Long getReportChannel() {
+        return reportChannel;
+    }
+
+    @Override
+    public String toString() {
+        return "HyriConfig{" +
+                "redis=" + redis +
+                ", mongoDB=" + mongoDB +
+                ", token='" + token + '\'' +
+                ", roles=" + roles +
+                ", categoryTickets=" + categoryTickets +
+                ", ideaChannels=" + ideaChannels +
+                ", voiceCustom=" + voiceCustom +
+                ", statusChannel=" + statusChannel +
+                '}';
     }
 }

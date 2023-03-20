@@ -3,6 +3,7 @@ package fr.hyriode.hyribot.command;
 import fr.hyriode.hyribot.Bootstrap;
 import fr.hyriode.hyribot.configuration.HyriConfig;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
+import net.dv8tion.jda.api.entities.Member;
 
 public enum HyriodeRole {
     STAFF(-2, "staff"),
@@ -40,5 +41,9 @@ public enum HyriodeRole {
 
     public boolean isSuperior(HyriodeRole role) {
         return role.getId() <= this.getId();
+    }
+
+    public boolean hasRole(Member member) {
+        return member.getRoles().stream().anyMatch(role -> role.getIdLong() == this.getRoleId());
     }
 }

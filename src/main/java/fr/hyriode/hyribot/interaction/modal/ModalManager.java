@@ -3,6 +3,7 @@ package fr.hyriode.hyribot.interaction.modal;
 import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.interaction.HyriInteraction;
 import fr.hyriode.hyribot.listener.HyriListener;
+import fr.hyriode.hyribot.manager.HyriManager;
 import fr.hyriode.hyribot.utils.MemberUtil;
 import fr.hyriode.hyribot.utils.NumberUtil;
 import net.dv8tion.jda.api.entities.Member;
@@ -20,14 +21,12 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class ModalManager {
+public class ModalManager extends HyriManager {
 
     private final List<HyriInteraction<ModalInteractionEvent>> modals = new ArrayList<>();
 
-    private final HyriBot bot;
-
     public ModalManager(HyriBot bot) {
-        this.bot = bot;
+        super(bot);
     }
 
     public List<HyriInteraction<ModalInteractionEvent>> getModals() {
@@ -38,15 +37,25 @@ public class ModalManager {
         return this.modals.stream().filter(modal -> modal.getId().equals(id)).findFirst().orElse(null);
     }
 
+
+
     public Modal createMemberModal(BiConsumer<ModalInteractionEvent, Member> event) {
+        return this.createMemberModal(event, null);
+    }
+
+    public Modal createMemberModal(BiConsumer<ModalInteractionEvent, Member> event, List<Member> memberList) {
         String id = UUID.randomUUID().toString();
         Modal modal = Modal.create(id, "Trouver un membre").addActionRow(TextInput.create("member", "Pseudo du Membre ou son ID.", TextInputStyle.SHORT).build()).build();
         this.modals.add(new HyriInteraction<>(id, e -> {
             String input = e.getValue("member").getAsString();
-            List<Member> members = MemberUtil.getMemberByNameOrId(e.getGuild(), input);
+            List<Member> members = new ArrayList<>(memberList == null
+                    ? MemberUtil.getMemberByNameOrId(e.getGuild(), input) : memberList);
 
             if (members.isEmpty()) {
-                e.reply("Aucun membre n'a cette ID ou ce pseudo.").setEphemeral(true).queue();
+                if(memberList == null)
+                    e.reply("Aucun membre n'a cette ID ou ce pseudo.").setEphemeral(true).queue();
+                else
+                    e.reply("Aucun membre trouvé dans le channel.").setEphemeral(true).queue();
                 return;
             }
             if (members.size() == 1) {
@@ -94,17 +103,22 @@ public class ModalManager {
     }
 
     public Modal createNumberModal(String title, int minimum, int maximum, BiConsumer<ModalInteractionEvent, Integer> action) {
-        String id = UUID.randomUUID().toString();
-        Modal modal = Modal.create(id, title).addActionRow(TextInput.create("number", "Veuillez saisir un nombre entre " + minimum + " et " + maximum, TextInputStyle.SHORT).build()).build();
+        final String id = UUID.randomUUID().toString();
+        final Modal modal = Modal.create(id, title).addActionRow(TextInput.create("number", "Veuillez saisir un nombre entre " + minimum + " et " + maximum, TextInputStyle.SHORT).build()).build();
         this.modals.add(new HyriInteraction<>(id, e -> {
-            String input = e.getValue("number").getAsString();
+            final String input = e.getValue("number").getAsString();
+
+            this.modals.remove(this.getModal(id));
+
             if(NumberUtil.isNumber(input)) {
-                int number = Integer.parseInt(input);
+                final int number = Integer.parseInt(input);
+
                 if(number >= minimum && number <= maximum) {
                     action.accept(e, number);
-                    this.modals.remove(this.getModal(id));
+                    return;
                 }
             }
+            e.reply("Veuillez saisir un nombre entre " + minimum + " et " + maximum).setEphemeral(true).queue();
         }));
         return modal;
     }

@@ -3,6 +3,7 @@ package fr.hyriode.hyribot.voicecustom;
 import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.command.HyriodeRole;
 import fr.hyriode.hyribot.configuration.HyriConfig;
+import fr.hyriode.hyribot.manager.HyriManager;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -11,23 +12,32 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class VoiceCustomManager {
+public class VoiceCustomManager extends HyriManager {
 
     private final List<VoiceCustom> voiceCustoms = new ArrayList<>();
 
-    private final HyriBot bot;
-
     public VoiceCustomManager(HyriBot bot) {
-        this.bot = bot;
+        super(bot);
     }
 
     public void create(Member member) {
+        if(this.hasVoiceCustomByOwnerId(member.getIdLong())) {
+            VoiceCustom voiceCustom = this.getVoiceCustomByOwnerId(member.getIdLong());
+            VoiceChannel channel = member.getGuild().getVoiceChannelById(voiceCustom.getChannelId());
+
+            if(channel != null) {
+                member.getGuild().moveVoiceMember(member, channel).queue();
+            }
+            return;
+        }
+
         HyriConfig config = this.bot.getConfig();
         Guild guild = member.getGuild();
         GuildVoiceState voiceState = member.getVoiceState();
@@ -56,16 +66,27 @@ public class VoiceCustomManager {
         }
     }
 
+    private VoiceCustom getVoiceCustomByOwnerId(long idLong) {
+        return this.voiceCustoms.stream()
+                .filter(voiceCustom -> voiceCustom.getOwnerId() == idLong)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean hasVoiceCustomByOwnerId(long userId) {
+        return this.voiceCustoms.stream().anyMatch(voiceCustom -> voiceCustom.getOwnerId() == userId);
+    }
+
     public List<VoiceCustom> getVoiceCustoms() {
         return voiceCustoms;
     }
 
-    public VoiceCustom getVoiceCustomByIdChannel(long vc) {
+    public VoiceCustom getVoiceCustomByChannelId(long vc) {
         return this.voiceCustoms.stream().filter(vcm -> vcm.getChannelId() == vc).findFirst().orElse(null);
     }
 
     public void remove(AudioChannel voiceChannel) {
-        VoiceCustom voiceCustom = this.getVoiceCustomByIdChannel(voiceChannel.getIdLong());
+        VoiceCustom voiceCustom = this.getVoiceCustomByChannelId(voiceChannel.getIdLong());
         this.voiceCustoms.remove(voiceCustom);
         voiceChannel.delete().queue();
     }

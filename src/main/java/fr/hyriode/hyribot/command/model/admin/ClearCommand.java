@@ -7,10 +7,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 import java.util.Arrays;
@@ -19,7 +20,9 @@ import java.util.stream.Collectors;
 
 public class ClearCommand extends HyriSlashCommand {
     public ClearCommand(HyriBot bot) {
-        super(bot);
+        super(bot, new CommandDataImpl("clear", "Clear le chat.")
+                .addOption(OptionType.INTEGER, "number", "Nombre de messages à supprimer.", true)
+                .addOption(OptionType.USER, "user", "L'utilisateur dont les messages seront supprimés."));
     }
 
     @Override
@@ -69,8 +72,4 @@ public class ClearCommand extends HyriSlashCommand {
         return messagesToDelete.size();
     }
 
-    @Override
-    public SlashCommandData getData() {
-        return new CommandDataImpl("clear", "Clear le chat.");
-    }
 }

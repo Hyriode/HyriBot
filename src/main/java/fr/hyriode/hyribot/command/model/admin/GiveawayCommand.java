@@ -6,18 +6,12 @@ import fr.hyriode.hyribot.giveaway.Giveaway;
 import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
 import fr.hyriode.hyribot.utils.TimeUtil;
 import fr.hyriode.hyribot.utils.giveaway.GiveawayUtil;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
@@ -26,7 +20,17 @@ import java.util.List;
 public class GiveawayCommand extends HyriSlashCommand {
 
     public GiveawayCommand(HyriBot bot) {
-        super(bot);
+        super(bot, new CommandDataImpl("giveaway", "Gestion des giveaways")
+                .addSubcommands(new SubcommandData("create", "Créer un giveaway")
+                        .addOption(OptionType.CHANNEL, "channel", "Channel du giveaway.", true)
+                        .addOption(OptionType.STRING, "price", "Prix du giveaway.", true)
+                        .addOption(OptionType.STRING, "duration", "Durée du giveaway. Exemple: 15s, 5m, 8h, 3d", true)
+                        .addOption(OptionType.INTEGER, "winners", "Nombre de gagnants.", true)
+                )
+                .addSubcommands(new SubcommandData("list", "Liste des giveaways"))
+                .addSubcommands(new SubcommandData("finish", "Terminer un giveaway")
+                        .addOption(OptionType.STRING, "id", "ID du giveaway.", true)
+                ));
     }
 
     @Override
@@ -90,20 +94,5 @@ public class GiveawayCommand extends HyriSlashCommand {
         }catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public SlashCommandData getData() {
-        return new CommandDataImpl("giveaway", "Gestion des giveaways")
-                .addSubcommands(new SubcommandData("create", "Créer un giveaway")
-                        .addOption(OptionType.CHANNEL, "channel", "Channel du giveaway.", true)
-                        .addOption(OptionType.STRING, "price", "Prix du giveaway.", true)
-                        .addOption(OptionType.STRING, "duration", "Durée du giveaway. Exemple: 15s, 5m, 8h, 3d", true)
-                        .addOption(OptionType.INTEGER, "winners", "Nombre de gagnants.", true)
-                )
-                .addSubcommands(new SubcommandData("list", "Liste des giveaways"))
-                .addSubcommands(new SubcommandData("finish", "Terminer un giveaway")
-                        .addOption(OptionType.STRING, "id", "ID du giveaway.", true)
-                );
     }
 }

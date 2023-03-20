@@ -3,6 +3,7 @@ package fr.hyriode.hyribot.ticket;
 import fr.hyriode.api.HyriAPI;
 import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.command.HyriodeRole;
+import fr.hyriode.hyribot.manager.HyriManager;
 import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,7 +18,7 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TicketManager {
+public class TicketManager extends HyriManager {
 
     private static final String REDIS_TICKETS_PROGRESS = HyriBot.NAME_KEY + ":ticketsProgress";
     private static final String REDIS_TICKETS_CLOSED = HyriBot.NAME_KEY + ":ticketsClosed";
@@ -25,10 +26,8 @@ public class TicketManager {
     private final List<TicketProgress> ticketsProgress;
     private final List<TicketClosed> ticketsClosed;
 
-    private final HyriBot bot;
-
     public TicketManager(HyriBot bot) {
-        this.bot = bot;
+        super(bot);
         this.ticketsProgress = HyriAPI.get().getRedisProcessor().get(jedis -> jedis.hgetAll(REDIS_TICKETS_PROGRESS).values().stream().map(s -> HyriAPI.GSON.fromJson(s, TicketProgress.class)).collect(Collectors.toList()));
         this.ticketsClosed = HyriAPI.get().getRedisProcessor().get(jedis -> jedis.hgetAll(REDIS_TICKETS_CLOSED).values().stream().map(s -> HyriAPI.GSON.fromJson(s, TicketClosed.class)).collect(Collectors.toList()));
     }

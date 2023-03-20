@@ -10,6 +10,7 @@ import fr.hyriode.hyribot.interaction.button.ButtonManager;
 import fr.hyriode.hyribot.interaction.modal.ModalManager;
 import fr.hyriode.hyribot.interaction.selectmenu.SelectMenuManager;
 import fr.hyriode.hyribot.listener.HyriListenerManager;
+import fr.hyriode.hyribot.music.MusicManager;
 import fr.hyriode.hyribot.ticket.TicketManager;
 import fr.hyriode.hyribot.voicecustom.VoiceCustomManager;
 import net.dv8tion.jda.api.JDA;
@@ -41,9 +42,11 @@ public class HyriBot {
     private ButtonManager buttonManager;
     private ModalManager modalManager;
     private VoiceCustomManager voiceCustomManager;
+    private MusicManager musicManager;
 
     public HyriBot(HyriConfig config) {
         System.out.println("Starting HyriBot...");
+
         this.config = config;
         this.hyriAPI = new HyriAPIImpl(new HyriAPIConfig.Builder()
                 .withRedisConfig(this.config.getRedis())
@@ -66,14 +69,15 @@ public class HyriBot {
     }
 
     private void initManagers() {
-        this.commandManager = new HyriCommandManager(this);
-        this.eventManager = new HyriListenerManager(this);
         this.giveawayManager = new GiveawayManager(this);
         this.ticketManager = new TicketManager(this);
         this.selectMenuManager = new SelectMenuManager(this);
         this.buttonManager = new ButtonManager(this);
         this.modalManager = new ModalManager(this);
         this.voiceCustomManager = new VoiceCustomManager(this);
+        this.musicManager = new MusicManager(this);
+        this.eventManager = new HyriListenerManager(this);
+        this.commandManager = new HyriCommandManager(this);
     }
 
     private void addListeners(JDABuilder builder) {
@@ -119,6 +123,10 @@ public class HyriBot {
 
     public VoiceCustomManager getVoiceCustomManager() {
         return voiceCustomManager;
+    }
+
+    public MusicManager getMusicManager() {
+        return this.musicManager;
     }
 
     public HyriAPI getHyriAPI() {

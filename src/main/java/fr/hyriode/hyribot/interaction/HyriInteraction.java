@@ -1,7 +1,5 @@
 package fr.hyriode.hyribot.interaction;
 
-import fr.hyriode.hyribot.Bootstrap;
-
 import java.util.function.Consumer;
 
 public class HyriInteraction<T> {

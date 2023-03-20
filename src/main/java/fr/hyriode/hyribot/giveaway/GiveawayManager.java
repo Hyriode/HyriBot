@@ -2,6 +2,7 @@ package fr.hyriode.hyribot.giveaway;
 
 import fr.hyriode.api.HyriAPI;
 import fr.hyriode.hyribot.HyriBot;
+import fr.hyriode.hyribot.manager.HyriManager;
 import fr.hyriode.hyribot.utils.ReaderConsole;
 import fr.hyriode.hyribot.utils.ThreadUtil;
 import fr.hyriode.hyribot.utils.giveaway.GiveawayUtil;
@@ -14,16 +15,14 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class GiveawayManager {
+public class GiveawayManager extends HyriManager {
 
     private static final String REDIS_KEY = HyriBot.NAME_KEY + ":giveaways";
-
-    private final HyriBot bot;
 
     private final List<Giveaway> giveaways;
 
     public GiveawayManager(HyriBot bot) {
-        this.bot = bot;
+        super(bot);
         this.giveaways = new ArrayList<>();
         this.giveaways.addAll(this.getGiveawaysAPI());
     }

@@ -5,14 +5,13 @@ import fr.hyriode.hyribot.command.HyriSlashCommand;
 import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 public class InfoCommand extends HyriSlashCommand {
 
     public InfoCommand(HyriBot bot) {
-        super(bot);
+        super(bot, "info", "Affiche les informations du serveur.");
     }
 
     @Override
@@ -37,10 +36,5 @@ public class InfoCommand extends HyriSlashCommand {
         desc.append("Ouvert aux Premium\n");
 
         event.replyEmbeds(e.setDescription(desc).build()).queue();
-    }
-
-    @Override
-    public SlashCommandData getData() {
-        return new CommandDataImpl("info", "Affiche les informations du serveur.");
     }
 }

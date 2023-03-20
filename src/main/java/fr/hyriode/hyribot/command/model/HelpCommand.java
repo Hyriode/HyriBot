@@ -3,15 +3,13 @@ package fr.hyriode.hyribot.command.model;
 import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.command.HyriSlashCommand;
 import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
-import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 public class HelpCommand extends HyriSlashCommand {
 
     public HelpCommand(HyriBot bot) {
-        super(bot);
+        super(bot, "help", "Affiche la liste des commandes.");
     }
 
     @Override
@@ -29,8 +27,4 @@ public class HelpCommand extends HyriSlashCommand {
         event.replyEmbeds(em.build()).queue();
     }
 
-    @Override
-    public SlashCommandData getData() {
-        return new CommandDataImpl("help", "Affiche la liste des commandes.");
-    }
 }

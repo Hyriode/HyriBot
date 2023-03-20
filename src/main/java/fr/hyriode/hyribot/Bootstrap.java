@@ -20,8 +20,10 @@ public class Bootstrap {
     private static boolean dev = false;
 
     public static void main(String[] args) throws IOException {
-        if(args[0].equalsIgnoreCase("dev"))
+        //TODO change for remove the NPE
+        if(args[0].equalsIgnoreCase("dev")) {
             dev = true;
+        }
 
         ReaderConsole reader = new ReaderConsole();
 
@@ -36,6 +38,7 @@ public class Bootstrap {
             config = FileUtils.readFileToString(FILE_CONFIG, StandardCharsets.UTF_8);
         }
 
+        System.out.println(config);
         start(GSON.fromJson(config, HyriConfig.class));
         reader.start();
     }

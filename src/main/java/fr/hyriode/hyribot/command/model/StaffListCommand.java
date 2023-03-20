@@ -9,9 +9,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ import java.util.List;
 public class StaffListCommand extends HyriSlashCommand {
 
     public StaffListCommand(HyriBot bot) {
-        super(bot);
+        super(bot, "staff", "Affiche la liste du staff d'Hyriode.");
     }
 
     @Override
@@ -58,8 +57,4 @@ public class StaffListCommand extends HyriSlashCommand {
         event.replyEmbeds(e.build()).queue();
     }
 
-    @Override
-    public SlashCommandData getData() {
-        return new CommandDataImpl("staff", "Affiche la liste du staff d'Hyriode.");
-    }
 }

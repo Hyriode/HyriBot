@@ -11,22 +11,25 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static fr.hyriode.hyribot.listener.model.voicechannel.VoiceCustomListener.*;
 
 public class VoiceCustom {
 
-    private transient Supplier<Guild> guildSupplier = () -> Bootstrap.getCurrentBot().getJDA().getGuildById(this.guildId);
+    private final transient Supplier<Guild> guildSupplier = () -> Bootstrap.getCurrentBot().getJDA().getGuildById(this.guildId);
 
-    private String id;
+    private final String id;
     private long ownerId;
     private long guildId;
-    private long channelId;
+    private final long channelId;
     private boolean isPublic;
+    private final List<Long> whitelistedUsers = new ArrayList<>();
+    private final List<Long> blacklistedUsers = new ArrayList<>();
 
     public VoiceCustom(String id, Member member, VoiceChannel channel) {
         this.id = id;
@@ -36,14 +39,13 @@ public class VoiceCustom {
     }
 
     public List<ItemComponent> getButtons() {
-        return ActionRow.of(this.isPublic()
+        return Arrays.asList(this.isPublic()
                         ? Button.danger(BUTTON_PANEL_PRIVATE, "Rendre privé")
                         : Button.success(BUTTON_PANEL_PUBLIC, "Rendre public"),
                 Button.secondary(BUTTON_PANEL_NAME, "Gérer le nom"),
                 Button.secondary(BUTTON_PANEL_LIMIT_USER, "Gérer la limite d'utilisateurs"),
                 Button.secondary(BUTTON_PANEL_WHITELIST, "Gérer la whitelist"),
-                Button.secondary(BUTTON_PANEL_MANAGE_MEMBERS, "Gérer les membres")
-        ).getComponents();
+                Button.secondary(BUTTON_PANEL_MANAGE_MEMBERS, "Gérer les membres"));
     }
 
     public String getId() {
@@ -73,20 +75,22 @@ public class VoiceCustom {
     }
 
     public List<Long> getWhitelist() {
-        return this.guildSupplier.get().getVoiceChannelById(this.channelId).getMemberPermissionOverrides().stream()
-                .map(perm -> perm.getMember().getIdLong()).collect(Collectors.toList());
+        return this.whitelistedUsers;
     }
 
-    public void addWhitelist(Member member) {
-        guildSupplier.get().getVoiceChannelById(this.channelId).getManager()
-                .putMemberPermissionOverride(member.getIdLong(), EnumSet.of(Permission.VOICE_CONNECT), null).queue();
+    public void addWhitelist(long member) {
+        if(blacklistedUsers.contains(member) || whitelistedUsers.contains(member)) return;
+        this.whitelistedUsers.add(member);
+        this.guildSupplier.get().getVoiceChannelById(this.channelId).getManager()
+                .putMemberPermissionOverride(member, EnumSet.of(Permission.VOICE_CONNECT), null).queue();
     }
 
-    public void removeWhitelist(Member member) {
-        guildSupplier.get().getVoiceChannelById(this.channelId).getManager()
-                .removePermissionOverride(member.getIdLong()).queue();
+    public void removeWhitelist(long member) {
+        if(blacklistedUsers.contains(member) || !whitelistedUsers.contains(member)) return;
+        this.whitelistedUsers.remove(member);
+        this.guildSupplier.get().getVoiceChannelById(this.channelId).getManager()
+                .removePermissionOverride(member).queue();
     }
-
 
     public void setOwnerId(long memberId) {
         this.ownerId = memberId;
@@ -106,6 +110,8 @@ public class VoiceCustom {
 
     public boolean ban(VoiceChannel voiceChannel, Member memberFind) {
         if(memberFind != null && voiceChannel != null && voiceChannel.getMembers().contains(memberFind)) {
+            this.blacklistedUsers.add(memberFind.getIdLong());
+            this.whitelistedUsers.remove(memberFind.getIdLong());
             voiceChannel.getManager().putPermissionOverride(memberFind, null, EnumSet.of(Permission.VOICE_CONNECT)).queue();
             return this.kick(voiceChannel, memberFind);
         }

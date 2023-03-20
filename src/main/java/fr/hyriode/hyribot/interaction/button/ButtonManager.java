@@ -4,6 +4,7 @@ import fr.hyriode.hyribot.Bootstrap;
 import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.interaction.HyriInteraction;
 import fr.hyriode.hyribot.listener.HyriListener;
+import fr.hyriode.hyribot.manager.HyriManager;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
@@ -14,14 +15,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ButtonManager {
+public class ButtonManager extends HyriManager {
 
     private final List<HyriInteraction<ButtonInteractionEvent>> buttons = new ArrayList<>();
 
-    private final HyriBot bot;
-
     public ButtonManager(HyriBot bot) {
-        this.bot = bot;
+        super(bot);
     }
 
     public Button create(String label, ButtonStyle style, Consumer<ButtonInteractionEvent> event) {
@@ -37,6 +36,10 @@ public class ButtonManager {
 
     public List<HyriInteraction<ButtonInteractionEvent>> getButtons() {
         return buttons;
+    }
+
+    public void addButton(String id, Consumer<ButtonInteractionEvent> action) {
+        this.buttons.add(new HyriInteraction<>(id, action));
     }
 
     public static class Event extends HyriListener {
