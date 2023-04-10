@@ -44,10 +44,11 @@ public class VoiceCustomManager extends HyriManager {
         String id = UUID.randomUUID().toString();
         Category category = guild.getCategoryById(config.getVoiceCustomCategory());
         Role rolePlayer = guild.getRoleById(HyriodeRole.PLAYER.getRoleId());
+        Role staffPlayer = guild.getRoleById(HyriodeRole.STAFF.getRoleId());
 
         if(voiceState != null && voiceState.getChannel() != null
                 && voiceState.getChannel().getIdLong() != config.getVoiceCustomChannel()
-                || category == null || rolePlayer == null) {
+                || category == null || rolePlayer == null || staffPlayer == null) {
             guild.kickVoiceMember(member).queue();
             return;
         }
@@ -56,6 +57,7 @@ public class VoiceCustomManager extends HyriManager {
                 .createVoiceChannel(member.getEffectiveName() + "'s Channel")
                 .addPermissionOverride(guild.getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
                 .addPermissionOverride(member, EnumSet.of(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT), null)
+                .addPermissionOverride(staffPlayer, EnumSet.of(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT), null)
                 .addPermissionOverride(rolePlayer, EnumSet.of(Permission.VIEW_CHANNEL), EnumSet.of(Permission.VOICE_CONNECT))
                 .complete();
 

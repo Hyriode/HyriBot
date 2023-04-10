@@ -290,10 +290,13 @@ public class MusicManager extends HyriManager {
     public boolean isInSameChannel(Member member){
         if(member != null) {
             GuildVoiceState voiceState = member.getVoiceState();
+            Member bot = member.getGuild().getSelfMember();
+            GuildVoiceState voiceStateBot = bot.getVoiceState();
 
-            if (voiceState != null) {
-                return isInChannel(member.getGuild().getSelfMember()) && voiceState.getChannel() != null &&
-                        voiceState.getChannel().getIdLong() == voiceState.getChannel().getIdLong();
+
+            if (voiceState != null && voiceStateBot != null) {
+                return isInChannel(bot) && voiceStateBot.getChannel() != null && voiceState.getChannel() != null &&
+                        voiceState.getChannel().getIdLong() == voiceStateBot.getChannel().getIdLong();
             }
         }
         return false;

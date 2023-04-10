@@ -32,8 +32,8 @@ public class InfoCommand extends HyriSlashCommand {
 
         desc.append("Minecraft Java (Non Bedrock)\n");
         desc.append("Type: Mini-Jeux\n");
-        desc.append("Version: 1.8-1.18\n");
-        desc.append("Ouvert aux Premium\n");
+        desc.append("Version: 1.8-1.19\n");
+        desc.append("Ouvert à tout le monde\n");
 
         event.replyEmbeds(e.setDescription(desc).build()).queue();
     }
