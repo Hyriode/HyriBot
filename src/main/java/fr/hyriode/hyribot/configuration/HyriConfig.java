@@ -22,6 +22,7 @@ public class HyriConfig {
     private final Long statusChannel;
     private final Long guildId;
     private final Long reportChannel;
+    private final Long welcomeChannel;
 
     public HyriConfig(RedisConfig redisConfig, MongoDBConfig mongoDBConfig) {
         this.redis = redisConfig;
@@ -34,6 +35,7 @@ public class HyriConfig {
         this.statusChannel = null;
         this.guildId = null;
         this.reportChannel = null;
+        this.welcomeChannel = null;
     }
 
     public String getToken() {
@@ -92,6 +94,10 @@ public class HyriConfig {
         return reportChannel;
     }
 
+    public long getWelcomeChannel() {
+        return this.welcomeChannel;
+    }
+
     @Override
     public String toString() {
         return "HyriConfig{" +
@@ -103,6 +109,7 @@ public class HyriConfig {
                 ", ideaChannels=" + ideaChannels +
                 ", voiceCustom=" + voiceCustom +
                 ", statusChannel=" + statusChannel +
+                ", welcomeChannel" + welcomeChannel +
                 '}';
     }
 }

@@ -68,8 +68,8 @@ public class VoiceCustom {
         Guild guild = guildSupplier.get();
         guild.getVoiceChannelById(this.channelId).getManager()
                 .putRolePermissionOverride(HyriodeRole.PLAYER.getRoleId(),
-                        isPublic ? EnumSet.of(Permission.VOICE_CONNECT, Permission.VIEW_CHANNEL) : null,
-                        isPublic ? EnumSet.of(Permission.VIEW_CHANNEL) : EnumSet.of(Permission.VOICE_CONNECT))
+                        isPublic ? EnumSet.of(Permission.VOICE_CONNECT, Permission.VIEW_CHANNEL) : EnumSet.of(Permission.VIEW_CHANNEL),
+                        isPublic ? null : EnumSet.of(Permission.VOICE_CONNECT))
                 .queue(__ -> success.run());
         this.isPublic = isPublic;
     }

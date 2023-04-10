@@ -1,13 +1,12 @@
 package fr.hyriode.hyribot.listener.model.voicechannel;
 
+import fr.hyriode.api.HyriAPI;
+import fr.hyriode.api.network.IHyriNetwork;
 import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.configuration.HyriConfig;
 import fr.hyriode.hyribot.listener.HyriListener;
 import fr.hyriode.hyribot.utils.ThreadUtil;
-import jdk.swing.interop.SwingInterOpUtils;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.Channel;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +29,17 @@ public class StatusChannelListener extends HyriListener {
                     VoiceChannel voiceChannel = guild.getVoiceChannelById(statusChannel);
 
                     while (voiceChannel != null) {
+                        IHyriNetwork network = HyriAPI.get().getNetworkManager().getNetwork();
+                        boolean isMaintenance = network.getMaintenance().isActive();
+                        int players = network.getPlayerCounter().getPlayers();
+                        int slots = network.getSlots();
                         try {
-                            voiceChannel.getManager().setName(System.currentTimeMillis() + " tah").queue();
+                            if (slots == -1 || isMaintenance) {
+                                voiceChannel.getManager().setName("🔒 Serveur fermé").queue();
+                            } else {
+                                voiceChannel.getManager().setName("🔓 Serveur " + players + "/" + slots).queue();
+                            }
+
                             ThreadUtil.sleep(10*60000);
                         } catch (Exception e) {
                             e.printStackTrace();

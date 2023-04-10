@@ -21,7 +21,7 @@ public class Bootstrap {
 
     public static void main(String[] args) throws IOException {
         //TODO change for remove the NPE
-        if(args[0].equalsIgnoreCase("dev")) {
+        if(args.length > 0 && args[0].equalsIgnoreCase("dev")) {
             dev = true;
         }
 

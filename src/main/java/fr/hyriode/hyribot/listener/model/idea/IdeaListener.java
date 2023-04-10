@@ -2,6 +2,7 @@ package fr.hyriode.hyribot.listener.model.idea;
 
 import fr.hyriode.hyribot.Bootstrap;
 import fr.hyriode.hyribot.HyriBot;
+import fr.hyriode.hyribot.command.HyriodeRole;
 import fr.hyriode.hyribot.idea.IdeaType;
 import fr.hyriode.hyribot.listener.HyriListener;
 import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
@@ -26,10 +27,11 @@ public class IdeaListener extends HyriListener {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        if(event.getMessage().getContentRaw().equals("TqtMeC")) {
+        if(event.getMessage().getContentRaw().equals("TqtMeC")
+                && event.getMember() != null && HyriodeRole.STAFF.hasRole(event.getMember())) {
             event.getChannel().sendMessageEmbeds(new HyriEmbedBuilder()
                             .setTitle("Donne ton idée !")
-                            .setDescription("Tu as une idée pour le serveur ? Tu peux la proposer ici !\nChoisie le type d'idée que tu souhaites proposer.")
+                            .setDescription("Tu as une idée pour le serveur ? Tu peux la proposer ici !\nChoisis le type d'idée que tu souhaites proposer.")
                             .build())
                     .setActionRow(
                             Button.primary("idea." + IdeaType.DISCORD, IdeaType.DISCORD.getDisplayName()),

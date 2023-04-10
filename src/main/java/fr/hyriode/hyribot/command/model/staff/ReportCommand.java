@@ -91,9 +91,7 @@ public class ReportCommand extends HyriSlashCommand implements HyriInteractionCo
                     event.replyModal(modal).queue();
                 }),this.bot.getButtonManager().create("Modifier Date", ButtonStyle.PRIMARY, event -> {
                     Modal modal = this.bot.getModalManager().createTextModal("Modification de la date", "Nouvelle date (Pattern: dd/MM/YYYY HH:mm)", (modalInteractionEvent, s) -> {
-                        System.out.println("modal");
                         if(report.setDate(s)) {
-                            System.out.println("date");
                             modalInteractionEvent.editMessage(MessageEditData.fromCreateData(this.reportMessage(report))).queue();
                         }
                     });

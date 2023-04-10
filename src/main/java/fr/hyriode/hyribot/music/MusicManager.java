@@ -279,7 +279,6 @@ public class MusicManager extends HyriManager {
 
     public String searchSpotify(String input) {
         try {
-            System.out.println(this.spotify.getAccessToken());
             Paging<Track> result = this.spotify.searchTracks(input).build().execute();
             return result.getItems()[0].getIsPlayable() + " uiui";
         } catch (Exception e) {

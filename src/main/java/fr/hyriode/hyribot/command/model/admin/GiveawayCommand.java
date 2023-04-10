@@ -35,10 +35,8 @@ public class GiveawayCommand extends HyriSlashCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        System.out.println("tah");
         try {
             String subcommandName = event.getSubcommandName();
-            System.out.println(subcommandName);
 
             if(subcommandName == null) return;
 
@@ -76,7 +74,7 @@ public class GiveawayCommand extends HyriSlashCommand {
                         giveawayList.append("Aucun giveaway existant.");
                     } else {
                         for (Giveaway giveaway : giveaways) {
-                            giveawayList.append(GiveawayUtil.getStatus(giveaway) + " " +giveaway.getId() + "\n");
+                            giveawayList.append(GiveawayUtil.getStatus(giveaway) + " (" + giveaway.getId() + ") " + giveaway.getPrize() + "\n");
                         }
                     }
 

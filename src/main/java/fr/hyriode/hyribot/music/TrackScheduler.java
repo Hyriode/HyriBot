@@ -15,17 +15,16 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
-    private final BlockingQueue<AudioTrack> queue;
-    private final List<AudioTrack> queueLoop;
+    private final List<AudioTrack> queue;
     private boolean loop = false;
+    private int currentTrack = 0;
 
     /**
      * @param player The audio player this scheduler uses
      */
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
-        this.queue = new LinkedBlockingQueue<>();
-        this.queueLoop = new ArrayList<>();
+        this.queue = new ArrayList<>();
     }
 
     public void setVolume(int volume) {
@@ -42,10 +41,7 @@ public class TrackScheduler extends AudioEventAdapter {
         // something is playing, it returns false and does nothing. In that case the player was already playing so this
         // track goes to the queue instead.
         if (!player.startTrack(track, true)) {
-            queue.offer(track);
-        }
-        if(this.loop){
-            this.queueLoop.add(track);
+            this.queue.add(track);
         }
     }
 
@@ -55,18 +51,41 @@ public class TrackScheduler extends AudioEventAdapter {
     public void nextTrack() {
         // Start the next track, regardless of if something is already playing or not. In case queue was empty, we are
         // giving null to startTrack, which is a valid argument and will simply stop the player.
-        player.startTrack(queue.poll(), false);
+        if(this.loop) {
+            if(this.queue.size() < this.currentTrack + 1)
+                this.currentTrack += 1;
+            else
+                this.currentTrack = 0;
+        } else {
+            this.resetLoop();
+        }
+        this.player.startTrack(this.queue.get(this.currentTrack), false);
+    }
+
+    private void resetLoop() {
+        if(this.currentTrack > 0) {
+            if(this.currentTrack >= this.queue.size() - 1) {
+                this.queue.clear();
+            } else {
+                for (int i = 0; i < this.currentTrack; i++) {
+                    this.queue.remove(0);
+                }
+            }
+        }
+        this.currentTrack = 0;
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         // Only start the next track if the end reason is suitable for it (FINISHED or LOAD_FAILED)
-        System.out.println("endReason: " + endReason);
 //        if(this.queue.isEmpty()){
 //            System.out.println("queue is empty");
 //            this.queue.addAll(this.queueLoop);
 //            queue(this.queueLoop.get(0));
 //        }
+        if(!this.loop && endReason == AudioTrackEndReason.FINISHED) {
+            this.queue.remove(track);
+        }
         if (endReason.mayStartNext) {
             nextTrack();
         }
@@ -79,13 +98,20 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void setLoop(boolean loop) {
         this.loop = loop;
+        if(!loop) {
+            this.resetLoop();
+        }
+    }
+
+    public int getCurrentTrack() {
+        return currentTrack;
     }
 
     public boolean isLoop() {
         return loop;
     }
 
-    public BlockingQueue<AudioTrack> getQueue() {
+    public List<AudioTrack> getQueue() {
         return this.queue;
     }
 }

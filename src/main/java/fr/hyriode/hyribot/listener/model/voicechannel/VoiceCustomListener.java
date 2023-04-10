@@ -61,9 +61,6 @@ public class VoiceCustomListener extends HyriListener {
 
     public VoiceCustomListener(HyriBot bot) {
         super(bot);
-        System.out.println("tah le bot voice custom les fous");
-        System.out.println(bot.getConfig());
-        System.out.println(bot.getConfig().getVoiceCustomChannel());
         this.channelId = () -> bot.getConfig().getVoiceCustomChannel();
         this.categoryId = () -> bot.getConfig().getVoiceCustomCategory();
         this.voiceCustomManager = bot::getVoiceCustomManager;
@@ -78,7 +75,7 @@ public class VoiceCustomListener extends HyriListener {
                 && member != null && HyriodeRole.STAFF.hasRole(member)) {
             HyriEmbedBuilder embedBuilder = new HyriEmbedBuilder();
             embedBuilder.setTitle("Panel du Channel Vocal Temporaire");
-            embedBuilder.setDescription("Cliquez sur le bouton pour afficher le panel");
+            embedBuilder.setDescription("Cliquez sur le bouton pour afficher le panel de ton channel vocal temporaire !");
             event.getChannel().sendMessageEmbeds(embedBuilder.build())
                     .setActionRow(Button.success("voice.custom.panel", "Ouvrir le Panel"))
                     .queue();
@@ -308,7 +305,7 @@ public class VoiceCustomListener extends HyriListener {
         embedBuilder.setTitle("Panel - " + voiceChannel.getName());
         desc.append("Propriétaire : <@" + voiceCustom.getOwnerId() + ">" + "\n");
         desc.append("Statut : " + StatusUtil.getStatusVoiceChannel(voiceCustom.isPublic()) + "\n");
-        desc.append("Limite utilisateurs : " + voiceChannel.getUserLimit() + "\n");
+        desc.append("Limite utilisateurs : " + (voiceChannel.getUserLimit() == 0 ? "Infini" : voiceChannel.getUserLimit()) + "\n");
         desc.append("Nombre d'utilisateurs dans la whitelist : " + voiceCustom.getWhitelist().size());
         embedBuilder.setDescription(desc);
         return embedBuilder;
@@ -320,7 +317,6 @@ public class VoiceCustomListener extends HyriListener {
         final AudioChannel leftChannel = event.getChannelLeft();
         final Member member = event.getMember();
 
-        System.out.println("Hello");
         //Left channel
         this.onLeftChannel(leftChannel, joinedChannel, member);
         //Joined channel
@@ -352,7 +348,6 @@ public class VoiceCustomListener extends HyriListener {
             }
 
             if(leftChannel.getParentCategoryIdLong() == this.getCategoryId()) {
-                System.out.println("tah");
                 leftChannel.delete().queue();
             }
         }
@@ -360,7 +355,6 @@ public class VoiceCustomListener extends HyriListener {
 
     private void onJoinChannel(AudioChannel joinedChannel, Member member) {
         if(joinedChannel != null) {
-            System.out.println("join");
             if (joinedChannel.getIdLong() == this.getChannelId()) {
                 this.getVoiceCustomManager().create(member);
             }

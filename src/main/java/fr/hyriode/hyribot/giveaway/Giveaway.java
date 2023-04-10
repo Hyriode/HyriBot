@@ -117,7 +117,7 @@ public class Giveaway {
     public EmbedBuilder asEmbedResult() {
         EmbedBuilder em = new HyriEmbedBuilder();
         em.setTitle("Giveaway • " + this.getPrize());
-        em.setDescription("Le giveaway est terminé gros, le(s) gagnant est : " + this.getWinner());
+        em.setDescription("Le giveaway est terminé, le(s) gagnant est : " + this.getWinner());
 
         return em;
     }
@@ -127,7 +127,6 @@ public class Giveaway {
         em.setTitle("Giveaway • " + this.getPrize());
         em.setDescription("Nombre de gagnants: " + this.getWinners() + "\n" +
                 "<t:" + ((this.getStartedAt() + this.getDuration()) / 1000) + ":R>");
-        System.out.println(em.getDescriptionBuilder());
 
         return em;
     }
@@ -135,7 +134,7 @@ public class Giveaway {
     public EmbedBuilder asEmbedError() {
         return new HyriEmbedBuilder()
                 .setTitle("Giveaway • " + this.getPrize())
-                .setDescription("Le giveaway est terminé gros, mais il n'y a pas eu de gagnant");
+                .setDescription("Le giveaway est terminé, mais il n'y a pas eu de gagnant");
     }
 
     public String getWinner() {

@@ -33,6 +33,10 @@ public class TicketManager extends HyriManager {
     }
 
     public TicketProgress createTicket(Member requester, TicketReportType reportType, TicketType ticketType) {
+        if(this.existsTicket(requester.getIdLong())) {
+            return null;
+        }
+
         Guild guild = requester.getGuild();
         Category categoryTicket = guild.getCategoryById(reportType.getCategoryId());
         if(categoryTicket == null) return null;
@@ -53,6 +57,10 @@ public class TicketManager extends HyriManager {
         return ticket;
     }
 
+    private boolean existsTicket(long memberId) {
+        return this.ticketsProgress.stream().anyMatch(ticketProgress -> ticketProgress.getRequesterId() == memberId);
+    }
+
     private MessageEmbed getTicketEmbed(Member member) {
         return new HyriEmbedBuilder()
                 .setTitle("Ticket - " + member.getEffectiveName())
@@ -62,14 +70,14 @@ public class TicketManager extends HyriManager {
 
     private TextChannel createTicketChannel(Member requester, Category categoryTicket, TicketType ticketType) {
         Guild guild = requester.getGuild();
-        Role mod = guild.getRoleById(HyriodeRole.MODERATOR.getRoleId());
+        Role mod = guild.getRoleById(HyriodeRole.STAFF.getRoleId());
         if(mod == null) return null;
 
         ChannelAction<TextChannel> channelAction = categoryTicket.createTextChannel("ticket-" + requester.getUser().getName())
                 .addPermissionOverride(requester, EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND), null)
                 .addPermissionOverride(guild.getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND));
 
-        if(ticketType == TicketType.ADMIN)
+        if(ticketType == TicketType.MOD)
             return channelAction
                     .addPermissionOverride(mod, EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND), null)
                     .complete();

@@ -9,7 +9,9 @@ import fr.hyriode.hyribot.ticket.TicketManager;
 import fr.hyriode.hyribot.ticket.TicketProgress;
 import fr.hyriode.hyribot.ticket.TicketReportType;
 import fr.hyriode.hyribot.ticket.TicketType;
+import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
 import fr.hyriode.hyribot.utils.ThreadUtil;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -35,9 +37,15 @@ public class TicketListener extends HyriListener {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         String msg = event.getMessage().getContentRaw();
-        if(msg.equals("TicKet")) {
+
+        if(msg.equals("TicKet") && event.getMember() != null && HyriodeRole.STAFF.hasRole(event.getMember())) {
+            EmbedBuilder embedBuilder = new HyriEmbedBuilder();
+            embedBuilder.setTitle("Créer un Ticket");
+            embedBuilder.setDescription("Si vous voulez discuter avec le staff pour communiquer des bugs ou autre,\n" +
+                    "Cliquez sur le bouton ci-dessous.");
+
             event.getChannel()
-                    .sendMessage("Ticket")
+                    .sendMessageEmbeds(embedBuilder.build())
                     .setActionRow(Button.primary("ticket.create", "Créer un Ticket"))
                     .queue();
         }
@@ -142,6 +150,13 @@ public class TicketListener extends HyriListener {
                         TicketType type = TicketType.valueOf(selectEvent.getValues().get(0));
                         TicketManager ticketManager = this.bot.getTicketManager();
                         TicketProgress ticket = ticketManager.createTicket(selectEvent.getMember(), reportType, type);
+
+                        if(ticket == null) {
+                            selectEvent.deferEdit().applyCreateData(new MessageCreateBuilder()
+                                    .setContent("Vous ne pouvez pas créer plusieurs tickets à la fois.")
+                                    .build()).queue();
+                            return;
+                        }
 
                         selectEvent.deferEdit().applyCreateData(new MessageCreateBuilder()
                                 .setContent("Voici votre ticket: <#" + ticket.getChannelId() + ">")

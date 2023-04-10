@@ -4,7 +4,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.List;
 
 /**
  * Holder for both the player and a track scheduler for one guild.
@@ -30,7 +30,7 @@ public class GuildMusicManager {
         player.addListener(scheduler);
     }
 
-    public BlockingQueue<AudioTrack> getPlaylist(){
+    public List<AudioTrack> getPlaylist(){
         return scheduler.getQueue();
     }
 

@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.List;
 
 public class PlaylistMusicCommand extends HyriSlashCommand {
 
@@ -55,7 +55,6 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
         Guild guild = event.getGuild();
         Member member = event.getMember();
         if(guild == null || member == null) return;
-        System.out.println("playlist");
 
         if (this.bot.getMusicManager().isInSameChannel(event.getMember())) {
             event.reply(this.getPlaylistMessage(guild).build()).queue();
@@ -82,7 +81,7 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
     public EmbedBuilder getListQueue(Guild guild) {
         GuildMusicManager musicManager = this.bot.getMusicManager().getGuildAudioPlayer(guild);
         EmbedBuilder e = new HyriEmbedBuilder();
-        e.setTitle("Musiques en attente");
+        e.setTitle("Musiques en attente (" + musicManager.getScheduler().getCurrentTrack() + ")");
 
         StringBuilder listTracks = new StringBuilder();
         AudioTrack audioTrack = musicManager.getPlayingTrack();
@@ -94,7 +93,7 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
             e.setDescription("Aucune musique n'est dans la liste");
             return e;
         }
-        BlockingQueue<AudioTrack> queue = musicManager.getPlaylist();
+        List<AudioTrack> queue = musicManager.getPlaylist();
 
         if (queue.size() != 0) {
             int i = 0;

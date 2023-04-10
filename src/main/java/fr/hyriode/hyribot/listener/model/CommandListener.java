@@ -42,10 +42,10 @@ public class CommandListener extends HyriListener {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        HyriBot.log(this, "Initialize commands" + (Bootstrap.isDev() ? " in dev mode" : "") + "...");
-
         int commandsSize = this.bot.getCommandManager().getCommands().size();
         final Guild guild = event.getJDA().getGuildById(this.bot.getConfig().getGuildId());
+
+        HyriBot.log(this, "Initialize commands (" + commandsSize + ")" + (Bootstrap.isDev() ? " in dev mode" : "") + "...");
 
         if(guild != null) {
             this.bot.getCommandManager().getCommands().forEach(command -> {

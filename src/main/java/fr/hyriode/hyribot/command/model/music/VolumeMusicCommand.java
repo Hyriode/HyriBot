@@ -39,7 +39,6 @@ public class VolumeMusicCommand extends HyriSlashCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        System.out.println("Sah");
         if (this.bot.getMusicManager().isInSameChannel(event.getMember())) {
             event.reply(MessageCreateData.fromEditData(this.getVolumeMessage(event.getGuild()).build())).queue();
             return;

@@ -12,11 +12,12 @@ public class LoopMusicCommand extends HyriSlashCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        if(this.bot.getMusicManager().loop(event.getGuild())) {
-            event.reply("La musique a été mise en boucle.").queue();
-            return;
-        }
-        event.reply("La musique n'a pas pu être mise en boucle.").queue();
+//        if(this.bot.getMusicManager().loop(event.getGuild())) {
+//            event.reply("La musique a été mise en boucle.").queue();
+//            return;
+//        }
+//        event.reply("La musique n'a pas pu être mise en boucle.").queue();
+        event.reply("Commande en attente.").setEphemeral(true).queue();
     }
 
 

@@ -4,11 +4,9 @@ public class ThreadUtil {
 
     public static void taskLater(int delay, Runnable runnable) {
         new Thread(() -> {
-            System.out.println("Tqt");
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException ignored) {}
-            System.out.println("Tah");
             runnable.run();
         }).start();
     }
