@@ -33,7 +33,7 @@ repositories {
 
         credentials {
             username System.getenv("GITHUB_USERNAME")
-            password "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"
+            password System.getenv("GITHUB_TOKEN")
         }
     }
 }
