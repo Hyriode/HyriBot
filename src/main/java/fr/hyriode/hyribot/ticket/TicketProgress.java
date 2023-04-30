@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
@@ -19,14 +21,13 @@ public class TicketProgress {
     private final long requesterId;
     private final long guildId;
     private final long channelId;
-    private final TicketType type;
+    private String pseudo = "Inconnu";
 
-    public TicketProgress(String id, long requesterId, long guildId, long channelId, TicketType type) {
+    public TicketProgress(String id, long requesterId, long guildId, long channelId) {
         this.id = id;
         this.requesterId = requesterId;
         this.guildId = guildId;
         this.channelId = channelId;
-        this.type = type;
     }
 
     public String getId() {
@@ -45,8 +46,14 @@ public class TicketProgress {
         return this.channelId;
     }
 
-    public TicketType getType() {
-        return this.type;
+    public void setPseudo(String pseudo) {
+        if(pseudo != null) {
+            this.pseudo = pseudo;
+        }
+    }
+
+    public String getPseudo() {
+        return pseudo;
     }
 
     public void addMember(Member member) {
@@ -86,13 +93,13 @@ public class TicketProgress {
 
     public void close(Member closer, List<Message> messages) {
         List<MessageTicket> messageTickets = messages.stream().map(MessageTicket::new).collect(Collectors.toList());
+        Collections.reverse(messageTickets);
         Bootstrap.getCurrentBot().getTicketManager().closeTicket(
                 new TicketClosed(
                         this.id,
                         this.requesterId,
                         this.guildId,
                         this.channelId,
-                        this.type,
                         true,
                         System.currentTimeMillis(),
                         closer.getIdLong(),
@@ -105,4 +112,7 @@ public class TicketProgress {
         Bootstrap.getCurrentBot().getTicketManager().update(this);
     }
 
+    public boolean hasPseudo() {
+        return !this.pseudo.equals("Inconnu");
+    }
 }

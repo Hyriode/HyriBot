@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 public class PlaylistMusicCommand extends HyriSlashCommand {
 
@@ -27,7 +28,7 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
 
         this.addButton(RESUME_BUTTON, event -> {
             Guild guild = event.getGuild();
-            if(guild == null) return;
+            if(guild == null || !this.bot.getMusicManager().isInSameChannel(event.getMember())) return;
 
             this.bot.getMusicManager().togglePause(guild);
             event.editMessage(MessageEditBuilder.fromCreateData(this.getPlaylistMessage(guild).build()).build()).queue();
@@ -35,7 +36,7 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
 
         this.addButton(STOP_BUTTON, event -> {
             Member member = event.getMember();
-            if(member == null) return;
+            if(member == null || !this.bot.getMusicManager().isInSameChannel(member)) return;
 
             this.bot.getMusicManager().stop(member);
             event.editMessage(MessageEditBuilder.fromCreateData(this.getPlaylistMessage(member).build()).build()).queue();
@@ -43,7 +44,7 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
 
         this.addButton(SKIP_BUTTON, event -> {
             Member member = event.getMember();
-            if(member == null) return;
+            if(member == null || !this.bot.getMusicManager().isInSameChannel(member)) return;
 
             this.bot.getMusicManager().skipTrack(member);
             event.editMessage(MessageEditBuilder.fromCreateData(this.getPlaylistMessage(member).build()).build()).queue();
@@ -93,7 +94,7 @@ public class PlaylistMusicCommand extends HyriSlashCommand {
             e.setDescription("Aucune musique n'est dans la liste");
             return e;
         }
-        List<AudioTrack> queue = musicManager.getPlaylist();
+        BlockingQueue<AudioTrack> queue = musicManager.getPlaylist();
 
         if (queue.size() != 0) {
             int i = 0;

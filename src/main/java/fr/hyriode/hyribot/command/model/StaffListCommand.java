@@ -49,7 +49,7 @@ public class StaffListCommand extends HyriSlashCommand {
             members.forEach(member -> {
                 membersS.append(StatusUtil.getStatusIconToString(member.getOnlineStatus()) + " " + member.getAsMention()).append("\n");
             });
-            e.addField(role.getName(), membersS.toString(), true);
+            e.addField(role.getName() + " (" + members.size() + ')', membersS.toString(), true);
         });
 
         e.setTitle("Staff d'Hyriode");

@@ -32,7 +32,7 @@ public class TicketManager extends HyriManager {
         this.ticketsClosed = HyriAPI.get().getRedisProcessor().get(jedis -> jedis.hgetAll(REDIS_TICKETS_CLOSED).values().stream().map(s -> HyriAPI.GSON.fromJson(s, TicketClosed.class)).collect(Collectors.toList()));
     }
 
-    public TicketProgress createTicket(Member requester, TicketReportType reportType, TicketType ticketType) {
+    public TicketProgress createTicket(Member requester, TicketReportType reportType, String pseudo) {
         if(this.existsTicket(requester.getIdLong())) {
             return null;
         }
@@ -41,15 +41,16 @@ public class TicketManager extends HyriManager {
         Category categoryTicket = guild.getCategoryById(reportType.getCategoryId());
         if(categoryTicket == null) return null;
 
-        TextChannel ticketChannel = this.createTicketChannel(requester, categoryTicket, ticketType);
+        TextChannel ticketChannel = this.createTicketChannel(requester, categoryTicket, reportType);
         if(ticketChannel == null) return null;
 
-        ticketChannel.sendMessage(requester.getAsMention()).setEmbeds(this.getTicketEmbed(requester))
+        TicketProgress ticket = new TicketProgress(UUID.randomUUID().toString(), requester.getIdLong(), guild.getIdLong(), ticketChannel.getIdLong());
+        ticket.setPseudo(pseudo);
+
+        ticketChannel.sendMessage(requester.getAsMention()).setEmbeds(this.getTicketEmbed(requester, ticket))
                 .setActionRow(Button.secondary("ticket.close", "Fermer le Ticket"),
                         Button.success("ticket.add_member", "Ajouter un membre"),
                         Button.danger("ticket.remove_member", "Retirer un membre")).queue();
-
-        TicketProgress ticket = new TicketProgress(UUID.randomUUID().toString(), requester.getIdLong(), guild.getIdLong(), ticketChannel.getIdLong(), ticketType);
 
         this.ticketsProgress.add(ticket);
         this.update(ticket);
@@ -57,18 +58,19 @@ public class TicketManager extends HyriManager {
         return ticket;
     }
 
-    private boolean existsTicket(long memberId) {
+    public boolean existsTicket(long memberId) {
         return this.ticketsProgress.stream().anyMatch(ticketProgress -> ticketProgress.getRequesterId() == memberId);
     }
 
-    private MessageEmbed getTicketEmbed(Member member) {
+    private MessageEmbed getTicketEmbed(Member member, TicketProgress ticketProgress) {
         return new HyriEmbedBuilder()
                 .setTitle("Ticket - " + member.getEffectiveName())
-                .setDescription("Pour fermer votre ticket, veuillez cliquer sur le bouton ci-dessous.")
+                .setDescription("Pour fermer votre ticket, veuillez cliquer sur le bouton ci-dessous." +
+                        (ticketProgress.hasPseudo() ? "\nPseudo : " + ticketProgress.getPseudo() : ""))
                 .build();
     }
 
-    private TextChannel createTicketChannel(Member requester, Category categoryTicket, TicketType ticketType) {
+    private TextChannel createTicketChannel(Member requester, Category categoryTicket, TicketReportType reportType) {
         Guild guild = requester.getGuild();
         Role mod = guild.getRoleById(HyriodeRole.STAFF.getRoleId());
         if(mod == null) return null;
@@ -77,7 +79,7 @@ public class TicketManager extends HyriManager {
                 .addPermissionOverride(requester, EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND), null)
                 .addPermissionOverride(guild.getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND));
 
-        if(ticketType == TicketType.MOD)
+        if(reportType.getType() == TicketType.MOD)
             return channelAction
                     .addPermissionOverride(mod, EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND), null)
                     .complete();
@@ -114,5 +116,17 @@ public class TicketManager extends HyriManager {
 
     public TicketProgress getTicketProgress(long idLong) {
         return this.ticketsProgress.stream().filter(ticketProgress -> ticketProgress.getChannelId() == idLong).findFirst().orElse(null);
+    }
+
+    public TicketProgress getTicketProgressByMemberId(long idLong) {
+        return this.ticketsProgress.stream().filter(ticketProgress -> ticketProgress.getRequesterId() == idLong).findFirst().orElse(null);
+    }
+
+    public TicketProgress getTicketProgress(String id) {
+        return this.ticketsProgress.stream().filter(ticketProgress -> ticketProgress.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    public TicketClosed getTicketClosed(String id) {
+        return this.ticketsClosed.stream().filter(ticketProgress -> ticketProgress.getId().equals(id)).findFirst().orElse(null);
     }
 }

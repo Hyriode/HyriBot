@@ -2,8 +2,8 @@ package fr.hyriode.hyribot.ticket;
 
 
 public enum TicketType {
-    ADMIN("Parler uniquement avec les administrateurs"),
     MOD("Parler avec l'équipe de modération"),
+    ADMIN("Parler uniquement avec les administrateurs"),
     ;
 
     private final String name;

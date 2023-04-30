@@ -8,19 +8,17 @@ public class TicketClosed {
     private final long requesterId;
     private final long guildId;
     private final long channelId;
-    private final TicketType type;
 
     private final boolean closed;
     private final long closedAt;
     private final long closerId;
     private final List<MessageTicket> messagesTicket;
 
-    public TicketClosed(String id, long requesterId, long guildId, long channelId, TicketType type, boolean closed, long closedAt, long closerId, List<MessageTicket> messagesTicket) {
+    public TicketClosed(String id, long requesterId, long guildId, long channelId, boolean closed, long closedAt, long closerId, List<MessageTicket> messagesTicket) {
         this.id = id;
         this.requesterId = requesterId;
         this.guildId = guildId;
         this.channelId = channelId;
-        this.type = type;
         this.closed = closed;
         this.closedAt = closedAt;
         this.closerId = closerId;
@@ -41,10 +39,6 @@ public class TicketClosed {
 
     public long getChannelId() {
         return this.channelId;
-    }
-
-    public TicketType getType() {
-        return this.type;
     }
 
     public boolean isClosed() {

@@ -60,6 +60,15 @@ public class TicketListener extends HyriListener {
 
         switch (id) {
             case "create": {
+                TicketProgress currentTicket = this.bot.getTicketManager().getTicketProgressByMemberId(event.getMember().getIdLong());
+
+                if(currentTicket != null) {
+                    event.reply("Vous ne pouvez pas créer plusieurs tickets à la fois.\n" +
+                            "Votre ticket courrant : <#" + currentTicket.getChannelId() + ">")
+                            .setEphemeral(true).queue();
+                    return;
+                }
+
                 event.reply("Quel type de ticket voulez vous traiter ?")
                         .setEphemeral(true).addActionRow(this.createSelectMenu()).queue();
             } break;
@@ -144,26 +153,31 @@ public class TicketListener extends HyriListener {
 
         return selectMenuManager.create(event -> {
             TicketReportType reportType = TicketReportType.valueOf(event.getValues().get(0));
+            TicketManager ticketManager = this.bot.getTicketManager();
+            TicketProgress currentTicket = ticketManager.getTicketProgressByMemberId(event.getMember().getIdLong());
+
+            if(currentTicket != null) {
+                event.deferEdit().applyCreateData(new MessageCreateBuilder()
+                        .setContent("Vous ne pouvez pas créer plusieurs tickets à la fois.\n" +
+                                "Votre ticket courrant : <#" + currentTicket.getChannelId() + ">")
+                        .build()).queue();
+                return;
+            }
+
+            if(reportType.isAskPseudo()) {
+                event.replyModal(this.bot.getModalManager().createTextModal("Votre pseudo en jeu", "Pseudo",
+                        (e, output) -> {
+                            TicketProgress ticket = ticketManager.createTicket(event.getMember(), reportType, output);
+                            ticket.setPseudo(output);
+                            e.reply("Voici votre ticket: <#" + ticket.getChannelId() + ">").setEphemeral(true).queue();
+                        })).queue();
+                return;
+            }
+
+            TicketProgress ticket = ticketManager.createTicket(event.getMember(), reportType, null);
+
             event.deferEdit().applyCreateData(new MessageCreateBuilder()
-                    .setContent("Vous avez choisie " + reportType.getName() + ",\nA qui voulez vous s'adresser ?")
-                    .addActionRow(selectMenuManager.create(selectEvent -> {
-                        TicketType type = TicketType.valueOf(selectEvent.getValues().get(0));
-                        TicketManager ticketManager = this.bot.getTicketManager();
-                        TicketProgress ticket = ticketManager.createTicket(selectEvent.getMember(), reportType, type);
-
-                        if(ticket == null) {
-                            selectEvent.deferEdit().applyCreateData(new MessageCreateBuilder()
-                                    .setContent("Vous ne pouvez pas créer plusieurs tickets à la fois.")
-                                    .build()).queue();
-                            return;
-                        }
-
-                        selectEvent.deferEdit().applyCreateData(new MessageCreateBuilder()
-                                .setContent("Voici votre ticket: <#" + ticket.getChannelId() + ">")
-                                .build()).queue();
-                    }, Arrays.stream(TicketType.values())
-                            .map(type -> SelectOption.of(type.getName(), type.name()))
-                            .toArray(SelectOption[]::new)))
+                    .setContent("Voici votre ticket: <#" + ticket.getChannelId() + ">")
                     .build()).queue();
         }, Arrays.stream(TicketReportType.values())
                 .map(TicketReportType::toSelectOption).toArray(SelectOption[]::new));

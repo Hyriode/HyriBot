@@ -24,15 +24,15 @@ public class SelectMenuManager extends HyriManager {
         super(bot);
     }
 
-    public SelectMenu create(Consumer<StringSelectInteractionEvent> event, SelectOption... options) {
+    public SelectMenu create(Consumer<StringSelectInteractionEvent> event, List<SelectOption> options) {
         String id = UUID.randomUUID().toString();
         SelectMenu selectMenu = StringSelectMenu.create(id).addOptions(options).build();
         this.stringSelectMenus.add(new HyriInteraction<>(id, event));
         return selectMenu;
     }
 
-    public SelectMenu create(Consumer<StringSelectInteractionEvent> event, List<SelectOption> options) {
-        return this.create(event, options.toArray(new SelectOption[0]));
+    public SelectMenu create(Consumer<StringSelectInteractionEvent> event, SelectOption... options) {
+        return this.create(event, Arrays.asList(options));
     }
 
     public SelectMenu createUser(Consumer<EntitySelectInteractionEvent> event) {

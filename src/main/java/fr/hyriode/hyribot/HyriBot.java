@@ -76,6 +76,7 @@ public class HyriBot {
         this.modalManager = new ModalManager(this);
         this.voiceCustomManager = new VoiceCustomManager(this);
         this.musicManager = new MusicManager(this);
+
         this.eventManager = new HyriListenerManager(this);
         this.commandManager = new HyriCommandManager(this);
     }

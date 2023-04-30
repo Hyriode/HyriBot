@@ -4,6 +4,7 @@ import fr.hyriode.hyribot.HyriBot;
 import fr.hyriode.hyribot.command.HyriSlashCommand;
 import fr.hyriode.hyribot.utils.HyriEmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -19,7 +20,7 @@ public class VolumeMusicCommand extends HyriSlashCommand {
 
     public VolumeMusicCommand(HyriBot bot) {
         super(bot, new CommandDataImpl("volume", "Changer le volume de la musique en cours de lecture.")
-                .addOption(OptionType.INTEGER, "volume", "Le volume à appliquer.", true));
+                .addOption(OptionType.INTEGER, "volume", "Le volume à appliquer.", false));
 
         this.addButton(VOLUME_UP, (event) -> {
             if (this.bot.getMusicManager().isInSameChannel(event.getMember())) {
@@ -71,6 +72,9 @@ public class VolumeMusicCommand extends HyriSlashCommand {
                         .setTitle("Volume")
                         .setDescription("Le volume est à " + volume + "%")
                         .build())
-                .setActionRow(Button.success(VOLUME_UP, "➕"), Button.danger(VOLUME_DOWN, "➖"));
+                .setActionRow(
+                        Button.success(VOLUME_UP, Emoji.fromCustom("plussolid", 1096118867811631185L, false)),
+                        Button.danger(VOLUME_DOWN, Emoji.fromCustom("minussolid", 1096118865739665458L, false))
+                );
     }
 }
